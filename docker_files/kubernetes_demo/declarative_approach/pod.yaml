@@ -1,0 +1,36 @@
+# refer https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/
+# will list all details of enclosing specs
+
+apiVersion: v1
+# Pod is k8 artifact or k8 object
+kind: Pod
+metadata:
+  # name of pod
+  name: second-app
+  # labels on pod
+  labels:
+    app: second-app
+    tier: backend  
+spec:
+  # container specification. Pod will have container inside
+  containers:
+    # name of container
+  - name: second-app-container
+    # image of container
+    image: cbagade/kubd-first-app:v5
+    # Policy for pulling image 
+    # Always pulled from image-registry
+    # IfNotPresent - Only pulled when not present locally
+    # Never - Get only locally and if some issue with image, the container startup failed
+    imagePullPolicy: Always
+    ports:
+      # container port (app will be exposed at 3000)
+      - containerPort: 3000
+
+# docker build -t cbagade/kubd-first-app:v5 .
+# docker push cbagade/kubd-first-app:v5
+# kubectl apply -f pod.yaml
+# kubectl exec -it second-app-pod -- /bin/bash
+# inside pod
+# curl http://localhost:3000
+# kubectl delete -f pod.yaml

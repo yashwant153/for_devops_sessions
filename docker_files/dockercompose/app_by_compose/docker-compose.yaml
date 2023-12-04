@@ -1,0 +1,62 @@
+version: "3.8"
+services:
+  mongodb:
+    image: 'mongo'
+    volumes: 
+      - data:/data/db
+    container_name: mongodb
+    command: [--auth]
+    env_file: 
+      - ./env/mongo.env
+#    environment:
+#      - MONGO_INITDB_ROOT_USERNAME=chandra
+#      - MONGO_INITDB_ROOT_PASSWORD=chandra
+  middleware:
+    container_name: middleware
+    image: cbagade/middleware:v5
+    build: ./middleware
+    # following is longer version of above one
+    # suppose you are coping some folder from Dockerfile, the context should be set
+    # to that folder which includes everything
+    # build:
+    #   context: ./middleware
+    #   dockerfile: Dockerfile
+    #   args:
+    #     some-arg: 1
+    ports:
+      # host port:container internal port
+      - '3000:3000'
+    
+    env_file: 
+      - ./env/middleware.env      
+    # mongo container will be created first
+    depends_on:
+      - mongodb
+# named volumes need to be listed
+volumes: 
+  data:
+
+# docker-compose up -d
+# might face error with docker version
+# try and use DOCKER_BUILDKIT=0 docker-compose up --build -d
+# Everything inside 1 docker-compose file will be crated on same network
+# GET http://localhost:3000/api/v1/fruits
+# POST http://localhost:3000/api/v1/fruits
+# {
+#    "fruitName":"Banana",
+#    "price": 89,
+#    "oraganic": true
+# }
+# GET http://localhost:3000/api/v1/fruits
+
+# docker compose down
+# following command remove everything including volume
+# docker compose down -v
+
+# following command will always cause docker image to build otherwise without --build it will build first time
+# and will use same image next time when it able to find that
+# docker-compose up -d --build 
+# for build images (just image building ), use (this won't start containers)
+# docker-compose build
+
+ 

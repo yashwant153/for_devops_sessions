@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+spec:
+  selector:
+    app: users
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+      - name: users
+        image: cbagade/kub-demo-users:latest
+        env:
+        - name: AUTH_ADDRESS
+          value: localhost
+      - name: auth
+        image: cbagade/kub-demo-auth:latest
+
+
+# both containers run in same pod
+# so localhost should call the other container
+# cd user_api
+# docker build -t cbagade/kub-demo-users:latest .
+# docker push cbagade/kub-demo-users:latest
+# cd auth_api
+# docker build -t cbagade/kub-demo-auth:latest .
+# docker push cbagade/kub-demo-auth:latest
+# cd ..
+# kubectl apply -f app_deployment.yaml
+# kubectl logs <pod>  -> will show containers
+# kubectl logs <pod> -c users -f
+# kubectl logs <pod> -c auth -f --> on other terminal
+# POST signup - http://localhost:30004/signup -> {     "email":"cbagade@yahoo.com",     "password":"devops" }
+# http://localhost:30004/login -> {     "email":"cbagade@yahoo.com",     "password":"devops" }
+# kubectl delete -f app_deployment.yaml
